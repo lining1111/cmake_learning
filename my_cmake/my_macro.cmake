@@ -1,0 +1,5 @@
+macro(my_macro a)
+    message("练习 macro")
+    message("my_macro")
+    message(STATUS "Hello ${a}")
+endmacro()
