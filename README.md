@@ -7,7 +7,7 @@
     C++因为出现的较早，也出现了很多的工程管理工具，如Make，autoMake，CMake，Bazel等等，
     但是cmake因为其灵活性和跨平台性，成为了现代C++工程管理工具的首选。
     cmake的中文文档:https://cmake.com.cn/
-    本工程参考的视频 https://www.bilibili.com/video/BV1rqPYehEsW
+    视频地址 https://www.bilibili.com/video/BV1rqPYehEsW
 
     下面的内容会以cmake学习为主，并辅以现代c++编程技巧展开。现代c++编程技巧，包括：智能指针、Lambda表达式、模板编程、协程编程、多线程编程等等。
 
@@ -16,7 +16,7 @@
     人工智能，会再一次的将ROS2机器人开发，以及深度学习提高热度，嵌入式编程可能不再是设备上简单的读取、写入、执行，
     而是可以在一个更大的系统上，充分发挥单一模组的服务特质，并将系统以更完备的姿态展示给世界的一个基石编程。
 
-## 章节
+## CMake章节
 
     练习章节，是将所有的练习内容，写到my_cmake目录下内的一个一个的.cmake文件中，通过在顶级的CMakeLists.txt中include来引入。
 
@@ -236,5 +236,43 @@ https://cmake.com.cn/cmake/help/latest/manual/cmake-variables.7.html
 
 ### CMake目录分层设计
 
-    
-    
+    将模块通过文件夹以及文件夹集合成库的方式，对工程的各个模组作解耦操作，是CMake目录分层设计的主要目的。
+
+## Modern C++章节
+
+    现代c++的中文文档 https://learn.microsoft.com/zh-cn/cpp/cpp/?view=msvc-140 文档虽然是windows家的，编程在linux下，但是正好体现了现代c++的跨系统性
+    视频地址 https://www.bilibili.com/video/BV1w2ppenEFj    
+
+### 智能指针
+####  unique_ptr
+
+    一个unique_ptr只能指向一个对象，当unique_ptr被销毁时，它所指向的对象也会被销毁。没有==运算符，不能复制unique_ptr，但可以移动unique_ptr，move()。
+
+    通过排序算法，确定类引用、指针引用、智能指针引用的速度，在Debug模式下，速度差别不大，在Release模式下，智能指针引用速度最快。
+    my_unique_ptr/my_unique_ptr_test.cpp
+
+#### shared_ptr
+
+    与unique_ptr不同，shared_ptr可以指向多个对象。
+    shared_ptr通过引用计数来管理对象的生命周期，当引用计数为0时，对象会被销毁。
+    在类的多态行为下，对智能指针shared_ptr进行转换
+    dynamic_pointer_cast
+    static_pointer_cast
+    const_pointer_cast
+    shared_ptr如果出现循环引用情况时，会出现内存无法自动释放情况，应该避免这种情况。
+
+    my_shared_ptr/my_shared_ptr_test.cpp
+
+#### weak_ptr
+
+    weak_ptr不能单独使用，必须结合shared_ptr使用，
+    weak_ptr的作用是对shared_ptr的对象进行观测，不会引起shared_ptr的引用计数的增加。基于这个特性，可以避开shared_ptr在循环引用情况下，出现内容无法自动释放情况
+    先声明出一个shared_ptr后，由weak_ptr来作引用，例如将shared_ptr传入到weak_ptr的构造，如下：
+    class A{};
+    shared_ptr<A> sp1 = make_shared<A>();
+    weak_ptr<A> wp1(sp1);
+    weak_ptr<A> wp2;
+    wp2 = wp1;
+    可以通过weak_ptr的lock函数来获取share_ptr的管理权，且是原子操作，可保证在多线程操作中，对share_ptr的操作是安全有效的
+
+    my_weak_ptr/my_weak_ptr_test.cpp

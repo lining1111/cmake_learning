@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.30)
 project(cmake_learning)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 # 函数和宏
 include(my_cmake/my_function.cmake)
@@ -73,3 +73,7 @@ file(GENERATE OUTPUT ${CMAKE_BINARY_DIR}/gen.txt CONTENT "platform = $<PLATFORM_
 
 
 add_executable(cmake_learning main.cpp)
+
+add_executable(my_unique_ptr_test my_unique_ptr/my_unique_ptr_test.cpp)
+add_executable(my_shared_ptr_test my_shared_ptr/my_shared_ptr_test.cpp)
+add_executable(my_weak_ptr_test my_weak_ptr/my_weak_ptr_test.cpp)
