@@ -6,10 +6,15 @@
     专门为高级语言服务的管理工具，如VUE的VUE-ite，Java的Maven，Python的pip，Go的Go Modules，Rust的Cargo等等。
     C++因为出现的较早，也出现了很多的工程管理工具，如Make，autoMake，CMake，Bazel等等，
     但是cmake因为其灵活性和跨平台性，成为了现代C++工程管理工具的首选。
-    cmake的官方文档:https://cmake.org/cmake/help/latest/
+    cmake的中文文档:https://cmake.com.cn/
     本工程参考的视频 https://www.bilibili.com/video/BV1rqPYehEsW
 
+    下面的内容会以cmake学习为主，并辅以现代c++编程技巧展开。现代c++编程技巧，包括：智能指针、Lambda表达式、模板编程、协程编程、多线程编程等等。
+
 ## 不积跬步，无以至千里；不积小流，无以成江海
+
+    人工智能，会再一次的将ROS2机器人开发，以及深度学习提高热度，嵌入式编程可能不再是设备上简单的读取、写入、执行，
+    而是可以在一个更大的系统上，充分发挥单一模组的服务特质，并将系统以更完备的姿态展示给世界的一个基石编程。
 
 ## 章节
 
@@ -17,17 +22,7 @@
 
     cmake -G 可以列出所有支持的生成器，前面带*的是默认的生成器。
 
-### 设置一个小目标
-
-**理解c++的具体编译过程，然后在理解cmake是如何组织工程，并按照c++的编译过程来完成工程到具体目标的过程，至关重要。**
-
-    1、  add_executable(target_name source1 source2 ...) # 默认生成的是可执行文件
-    2、  add_library(target_name source1 source2 ...) # 默认生成的是静态库
-    3、  add_library(target_name STATIC|SHARED|MODULE source1 source2 ...) # 指定生成的是静态库，动态库，模块库
-    4、  add_executable(target_name)  # 生成可执行文件
-         add_library(target_name) # 生成库文件    # 生成库文件的时候，需要指定库文件类型
-        target_sources(target_name source1 source2 ...) # 指定生成可执行文件需要的源文件
-    
+    **理解c++的具体编译过程，然后在理解cmake是如何组织工程，并按照c++的编译过程来完成工程到具体目标的过程，至关重要。**
     尝试下手动编译
     假设有 main.cpp  hello.cpp  hello.h 三个文件
     1、 g++ hello.cpp -c -o hello.o
@@ -37,7 +32,19 @@
         ar rcs libhello.a hello.o #静态库，可以使用 ar -t 查看库文件中的内容 nm -s libhello.a 查看符号表
         # 动态库
         g++ -fPIC -c hello.cpp -o hello.o # 生成与位置无关的代码
-        g++ -shared -o libhello.so hello.o # 动态库，可以使用 ldd 查看动态库依赖的库文件   
+        g++ -shared -o libhello.so hello.o # 动态库，可以使用 ldd 查看动态库依赖的库文件       
+
+### 设置一个小目标
+
+    https://cmake.com.cn/cmake/help/latest/guide/tutorial/A%20Basic%20Starting%20Point.html
+    https://cmake.com.cn/cmake/help/latest/guide/tutorial/Adding%20a%20Library.html
+
+    1、  add_executable(target_name source1 source2 ...) # 默认生成的是可执行文件
+    2、  add_library(target_name source1 source2 ...) # 默认生成的是静态库
+    3、  add_library(target_name STATIC|SHARED|MODULE source1 source2 ...) # 指定生成的是静态库，动态库，模块库
+    4、  add_executable(target_name)  # 生成可执行文件
+         add_library(target_name) # 生成库文件    # 生成库文件的时候，需要指定库文件类型
+        target_sources(target_name source1 source2 ...) # 指定生成可执行文件需要的源文件
 
 
     link_libraries() # 链接库文件,将库连接到该句后面出现的所有目标上
@@ -78,7 +85,8 @@
                     但是如果有一个可执行文件 app，它依赖于 libA，那么它会自动链接到 libB，并且可以使用 libB 的功能。
 
 ### CMAKE语法之变量
-
+https://cmake.com.cn/cmake/help/latest/manual/cmake-variables.7.html
+    
     变量的作用域可以使用
     block来定义，例如：
     block()
@@ -107,6 +115,10 @@
         set(ENV{LD_LIBRARY_PATH} “$ENV{LD_LIBRARY_PATH}:/new/path”) #将/new/path临时添加到LD_LIBRARY_PATH环境变量中
 
 ### CMAKE控制流程 if/elseif/else/endif for_each/endforeach while/endwhile break continue
+
+    https://cmake.com.cn/cmake/help/latest/manual/cmake-commands.7.html
+    https://cmake.com.cn/cmake/help/latest/manual/cmake-env-variables.7.html
+    https://cmake.com.cn/cmake/help/latest/manual/cmake-variables.7.html
     这部分还存在
     逻辑运算符 AND/OR/NOT
     比较运算符 EQUAL/STREQUAL/LESS/GREATER/LESS_EQUAL/GREATER_EQUAL/STRLESS/STRGREATER/STRLESS_EQUAL/STRGREATER_EQUAL
@@ -155,6 +167,8 @@
 
 ### 函数和宏
 
+    https://cmake.com.cn/cmake/help/latest/command/function.html
+    https://cmake.com.cn/cmake/help/latest/command/macro.html
     函数和宏的区别是，函数有自己的栈信息，而宏就是自定义替换
 
     #函数
@@ -193,6 +207,34 @@
         <commands>
     endmacro()
 
-### 生成器表达式 list string math file
+### list string math file 生成器表达式
+
+    https://cmake.com.cn/cmake/help/latest/command/list.html
+    https://cmake.com.cn/cmake/help/latest/command/string.html
+    https://cmake.com.cn/cmake/help/latest/command/math.html
+    https://cmake.com.cn/cmake/help/latest/command/file.html
+    https://cmake.com.cn/cmake/help/latest/manual/cmake-generator-expressions.7.html
+
+    list()
+        list(LENGTH <list> <out-var>) #LENGTH/GET/REMOVE/APPEND/INSERT/REVERSE/SORT/JOIN/SUBLIST/TRANSFORM
+    string()
+        string(STRIP <string> <out-var>) #STRIP/REPLACE/FIND/REPLACE/TOLOWER/TOUPPER/LENGTH/COMPARE/GENEX_STRIP/GENEX_EVAL/GENEX_STRIP/GENEX_EVAL
+    math()
+        math(EXPR <variable> <expression>) #EXPR/ABS/ABSOLUTE/CEIL/CONSTANT/FACTORIAL/FLOOR/LOG10/LOG2/POW/ROUND/SQRT/SIN/COS/TAN/ASIN/ACOS/ATAN
+    file()
+        file(<cmd> <args>...) #GLOB/READ/REMOVE/RENAME/RECURSE/TO_CMAKE_PATH/TO_NATIVE_PATH/MAKE_DIRECTORY/REMOVE_DIRECTORY/REMOVE/RENAME/RENAME
+    常见的生成器表达式：
+        $<CONFIGURATION>：配置名称，如Debug、Release等。
+        $<PLATFORM_ID>：平台名称，如Windows、Linux等。
+        $<COMPILE_LANGUAGE>：编译语言，如C、C++等。
+        $<C_COMPILER_ID>：C编译器ID，如GNU、Clang等。
+        $<CXX_COMPILER_ID>：C++编译器ID，如GNU、Clang等。
+        $<CXX_STANDARD>：C++标准，如C++11、C++14等。
+        $<CXX_COMPILER_VERSION>：C++编译器版本，如4.8、5.3等。
+        $<TARGET_NAME:...>：目标名称，如myApp。
+        $<TARGET_FILE:...>：目标文件路径，如myApp.exe。
+
+### CMake目录分层设计
+
     
     
