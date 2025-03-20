@@ -1,4 +1,4 @@
-# cmake 练习
+# cmake/c++ 练习
 
     本意:现代工程尤其是c++工程,需要使用cmake来管理,所以这里记录一下cmake的使用,为以后方便工程组织来作基础。
     
@@ -15,6 +15,7 @@
 
     人工智能，会再一次的将ROS2机器人开发，以及深度学习提高热度，嵌入式编程可能不再是设备上简单的读取、写入、执行，
     而是可以在一个更大的系统上，充分发挥单一模组的服务特质，并将系统以更完备的姿态展示给世界的一个基石编程。
+    学习cmake与c++的心态应该摒弃更高级的语言不是功能更强大、更方便吗的心态。练习尺有所长、寸有所短的心态。
 
 ## CMake章节
 
@@ -85,7 +86,8 @@
                     但是如果有一个可执行文件 app，它依赖于 libA，那么它会自动链接到 libB，并且可以使用 libB 的功能。
 
 ### CMAKE语法之变量
-https://cmake.com.cn/cmake/help/latest/manual/cmake-variables.7.html
+
+    https://cmake.com.cn/cmake/help/latest/manual/cmake-variables.7.html
     
     变量的作用域可以使用
     block来定义，例如：
@@ -240,7 +242,8 @@ https://cmake.com.cn/cmake/help/latest/manual/cmake-variables.7.html
 
 ## Modern C++章节
 
-    现代c++的中文文档 https://learn.microsoft.com/zh-cn/cpp/cpp/?view=msvc-140 文档虽然是windows家的，编程在linux下，但是正好体现了现代c++的跨系统性
+    现代c++的中文文档 https://changkun.de/modern-cpp/ 
+    这个作者有这个的代码仓库 https://github.com/changkun/modern-cpp-tutorial
     视频地址 https://www.bilibili.com/video/BV1w2ppenEFj    
 
 ### 智能指针
@@ -276,3 +279,27 @@ https://cmake.com.cn/cmake/help/latest/manual/cmake-variables.7.html
     可以通过weak_ptr的lock函数来获取share_ptr的管理权，且是原子操作，可保证在多线程操作中，对share_ptr的操作是安全有效的
 
     my_weak_ptr/my_weak_ptr_test.cpp
+
+### Lambda表达式
+
+    常见样式：
+    [捕获变量](参数列表) 可选限定符->返回类型{
+        //函数代码
+    }
+    捕获变量的方式 [=] 按值捕获 ;[&] 按引用捕获
+
+    my_lambda/my_lambda_test.cpp
+
+### 互斥和锁 mutex & lock
+
+    这两个都是为多线程处理数据时，保证数据的一致性的。
+    但是容易出现死锁和活锁的情况，避免出现的方法遵循以下原则：
+    1、有多个锁进行lock的时候，保证所有线程中的lock都是按一个顺序来的，或者使用std::scoped_lock来保证顺序
+    2、尽量的按照类或者方法都是为数据服务的理念，尽量的在一个类或者方法中，线程的运行只对一个锁进行操作。
+
+### future/promise/async
+    future和promise是配合使用的，promise用来设置future的值，future用来获取promise的值，并且future的值只能获取一次，获取后promise的值会被清空。
+    async用来异步执行函数，返回一个future，future的值就是函数的返回值。
+
+### atomic
+    atomic是C++11中引入的原子操作类，用来保证多线程操作时的数据一致性，避免出现数据竞争的情况。

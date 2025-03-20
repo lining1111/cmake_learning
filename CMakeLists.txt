@@ -77,3 +77,5 @@ add_executable(cmake_learning main.cpp)
 add_executable(my_unique_ptr_test my_unique_ptr/my_unique_ptr_test.cpp)
 add_executable(my_shared_ptr_test my_shared_ptr/my_shared_ptr_test.cpp)
 add_executable(my_weak_ptr_test my_weak_ptr/my_weak_ptr_test.cpp)
+
+add_executable(my_lambda_test my_lambda/my_lambda_test.cpp)
