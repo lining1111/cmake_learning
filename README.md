@@ -240,6 +240,58 @@
 
     将模块通过文件夹以及文件夹集合成库的方式，对工程的各个模组作解耦操作，是CMake目录分层设计的主要目的。
 
+### 配置和使用三方库
+
+    CMAKE_MODULE_PATH：指定CMake模块的搜索路径，默认为/usr/share/cmake-<version>/Modules/。
+        find_package(<package> [QUIET] [REQUIRED] [COMPONENTS <components>])：查找三方库，如find_package(OpenCV REQUIRED)。
+        这条命令就是在CMake的模块搜索路径中，找到Find<package>.cmake文件，然后执行该文件中的内容，查找三方库并设置相关的变量。
+        如 Imported Targets：OpenCV::core、OpenCV::imgproc等。
+#### CMake生成一个自定义库并安装
+
+    1、生成库
+        add_library(<name> [STATIC | SHARED | MODULE] [EXCLUDE_FROM_ALL] source1 [source2 ...])
+    2、生成配置文件
+        include(CMakePackageConfigHelpers)
+        write_basic_package_version_file(<name> VERSION <version> [COMPATIBILITY AnyNewerVersion] [PREFIX <prefix>])
+        configure_package_config_file(<template> <output> INSTALL_DESTINATION <dir> [PATH_VARS <var1> ...] [QUIET])
+    3、导出目标
+        install(TARGETS <name> [EXPORT <export_name>])
+    4、导出配置
+        install(EXPORT <export_name> [FILE <filename>] [NAMESPACE <names>] [DESTINATION <dir>])
+    5、安装复制文件
+        install(FILES <file> ... [DESTINATION <dir>])
+        
+
+#### CMake可以与gtest一起使用
+
+    在工程主目录的CMakeLists.txt文件中添加：
+        # 测试
+        enable_testing()    
+        add_subdirectory(test EXCLUDE_FROM_ALL)
+    
+    在测试文件夹中的CMakeLists.txt文件中添加：
+        # 自动下载依赖
+        include(FetchContent)
+        # 获取项目。可以是一个URL也可以是一个Git仓库。
+        FetchContent_Declare(gtest
+            GIT_REPOSITORY https://github.com/google/googletest.git
+            GIT_TAG release-1.10.0
+        )
+        # 获取我们需要库,然后引入项目。
+        FetchContent_MakeAvailable(gtest)
+
+        # 添加可执行文件
+        add_executable(myTest main.cpp)
+        # 链接库
+        target_link_libraries(myTest PRIVATE gtest gtest_main)
+        # 包含gtest模块
+        include(GoogleTest) 
+        # 发现测试用例
+        gtest_discover_tests(myTest)
+
+
+    CMAKE_INSTALL_INCLUDEDIR：指定头文件的安装路径，默认为/usr/local/include/。
+
 ## Modern C++章节
 
     现代c++的中文文档 https://changkun.de/modern-cpp/ 
