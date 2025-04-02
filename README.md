@@ -298,7 +298,23 @@
     这个作者有这个的代码仓库 https://github.com/changkun/modern-cpp-tutorial
     视频地址 https://www.bilibili.com/video/BV1w2ppenEFj    
 
+### const & constexpr
+    const:常量，修饰变量，函数，类，对象，指针，引用
+    constexpr:常量表达式，修饰变量，函数，类，对象，指针，引用。能用于复杂的对象构造或函数调用。
+    const和constexpr的区别：
+        const：常量值在编译时确定，但并不保证在编译时求值。它可以在运行时被修改。
+        constexpr：常量表达式在编译时求值，并且其值必须在编译时确定。这意味着constexpr变量或函数的返回值必须是编译时常量。
+    应用场景：
+        const：通常用于需要常量值但不要求编译时求值的场景。
+        constexpr：用于需要编译时求值的场景，例如数组大小、模板参数等。
+
+    总结来说，constexpr是const的增强版，是const的子集。在需要优化性能和确保代码在编译时就能确定值的场景中非常有用。
+
 ### 智能指针
+
+    智能指针是C++11中引入的一种新的内存管理机制，用于自动管理动态分配的内存，避免内存泄漏和悬空指针的问题。C++11中提供了三种智能指针：unique_ptr、shared_ptr和weak_ptr。
+    智能指针在多线程中也是不安全的，只有只读访问智能指针(详看weak_ptr的lock())在多线程下是安全的
+
 ####  unique_ptr
 
     一个unique_ptr只能指向一个对象，当unique_ptr被销毁时，它所指向的对象也会被销毁。没有==运算符，不能复制unique_ptr，但可以移动unique_ptr，move()。
@@ -328,7 +344,8 @@
     weak_ptr<A> wp1(sp1);
     weak_ptr<A> wp2;
     wp2 = wp1;
-    可以通过weak_ptr的lock函数来获取share_ptr的管理权，且是原子操作，可保证在多线程操作中，对share_ptr的操作是安全有效的
+    std::shared_ptr<const int> wpConst = wp2.lock(); // 转换为只读访问
+    可以通过weak_ptr的lock函数来获取share_ptr的管理权，且是原子操作，可保证在多线程操作中，对share_ptr的操作是安全有效的(只读访问智能指针)
 
     my_weak_ptr/my_weak_ptr_test.cpp
 
@@ -349,9 +366,114 @@
     1、有多个锁进行lock的时候，保证所有线程中的lock都是按一个顺序来的，或者使用std::scoped_lock来保证顺序
     2、尽量的按照类或者方法都是为数据服务的理念，尽量的在一个类或者方法中，线程的运行只对一个锁进行操作。
 
-### future/promise/async
+### 读写锁 shared_mutex & shared_lock
+
+    c++17中才有的
+    shared_mutex是读写锁的一种，用来保证多线程操作时的数据一致性，避免出现数据竞争的情况。
+    shared_mutex有两种模式：独占模式和共享模式。独占模式下，只有一个线程可以占有；共享模式下，可以有多个线程占有。
+    shared_mutex是可重入的，可以同时被多个线程持有，但是只有一个线程可以持有写锁，其他线程只能持有读锁。
+
+    shared_lock是读写锁的一种，用来保证多线程操作时的数据一致性，避免出现数据竞争的情况。
+    shared_lock是可重入的，可以同时被多个线程持有，但是只有一个线程可以持有写锁，其他线程只能持有读锁。
+    使用示例：
+    //独占模式
+    std::shared_mutex mutex;
+    std::unique_lock<std::shared_mutex> lock(mutex);//也可以使用lock_guard
+    lock.lock();
+    // do something
+    lock.unlock();
+
+    //共享模式
+    std::shared_mutex mutex;
+    std::shared_lock<std::shared_mutex> lock(mutex);//只可以使用这个
+    lock.lock_shared();
+    // do something
+
+    lock.unlock_shared();
+
+    my_shared_mutex/my_shared_mutex_test.cpp 里面有互斥锁 std::mutex和读写锁std::shared_mutex，
+    当使用互斥锁的时候，当写线程不占有锁时读线程之间也在争夺锁；而读写锁的时候，读线程可以在写线程不占有锁的时候同时读。提高了效率
+    所以读写锁，广泛的应用在数据库、内容或媒体分发等方面
+
+    与std::mutex存在std::timed_mutex一样，std::shared_mutex也存在std::shared_timed_mutex，std::shared_timed_mutex是std::shared_mutex的子类，提供了一种带有超时的读写锁。
+
+### future/promise/async/packaged_task
+
     future和promise是配合使用的，promise用来设置future的值，future用来获取promise的值，并且future的值只能获取一次，获取后promise的值会被清空。
     async用来异步执行函数，返回一个future，future的值就是函数的返回值。
+    packaged_task用来包装一个函数，返回一个future，future的值就是函数的返回值。
+    使用示例：
+    //promise & future
+    std::promise<int> promise;
+    std::future<int> future = promise.get_future();
+    std::thread t([](std::promise<int> &promise){
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        promise.set_value(1);
+    }, std::ref(promise));
+    std::cout << future.get() << std::endl;
+    t.join();
+
+    //async & future
+    std::future<int> future = std::async([](){
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        return 1;
+    });
+    std::cout << future.get() << std::endl;
+
+    //packaged_task & future
+    std::packaged_task<int()> task([](){
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        return 1;
+    });
+    std::future<int> future = task.get_future();
+    std::thread t(std::move(task));
+    std::cout << future.get() << std::endl;
+    t.join();
 
 ### atomic
+
     atomic是C++11中引入的原子操作类，用来保证多线程操作时的数据一致性，避免出现数据竞争的情况。
+    atomic的常用操作包括：
+    - load()：加载原子变量的值
+    - store()：存储原子变量的值
+    使用示例
+    std::atomic<int> count(0);
+    std::thread t1([&count](){
+        for (int i = 0; i < 1000000; i++) {
+            count.fetch_add(1);
+        }
+    });
+    std::thread t2([&count](){
+        for (int i = 0; i < 1000000; i++) {
+            count.fetch_add(1);
+        }
+    });
+    t1.join();
+    t2.join();
+    std::cout << count << std::endl;
+
+### condition_variable
+
+    condition_variable是C++11中引入的条件变量，用于线程间的同步。它通常与互斥锁一起使用，用于等待某个条件成立。
+    condition_variable的常用操作包括：
+    - wait()：等待条件变量，直到条件成立
+    - notify_one()：唤醒一个等待的线程
+    - notify_all()：唤醒所有等待的线程
+    使用示例
+    std::mutex mtx;
+    std::condition_variable cv;
+    bool ready = false;
+    std::thread t1([&](){
+        std::unique_lock<std::mutex> lock(mtx);
+        cv.wait(lock, [&](){ return ready; });
+        std::cout << "t1: " << ready << std::endl;
+    });
+    std::thread t2([&](){
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::unique_lock<std::mutex> lock(mtx);
+        ready = true;
+        cv.notify_one();
+        std::cout << "t2: " << ready << std::endl;
+    });
+    t1.join();
+    t2.join();
